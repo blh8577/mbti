@@ -15,7 +15,7 @@ public class CommentsVO {
     //반대수
     private int opposition;
     private String viewcheck;
-    private int board_boardno;
+    private int boardBoardno;
     private String memberMid;
     private int level;
     private String wrdate;

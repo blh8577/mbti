@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace는 연결할 Mapper 인터페이스의 전체 경로와 정확히 일치해야 합니다. -->
+<mapper namespace="com.community.mbti.mapper.MemberMapper">
+
+    <select id="findMemberById" resultType="MemberVO" parameterType="String">
+        SELECT
+            mid,
+            mpw,
+            mbti_idx
+        FROM
+            MEMBER
+        WHERE
+            mid = #{mid}
+    </select>
+
+    <select id="findAllMembers" resultType="MemberVO">
+        SELECT
+            mid,
+            mpw,
+            mbti_idx
+        FROM
+            MEMBER
+    </select>
+
+    <insert id="insertMember" parameterType="MemberVO">
+        INSERT INTO MEMBER (
+            mid,
+            mpw,
+            mbti_idx
+        ) VALUES (
+                     #{mid},
+                     #{mpw},
+                     #{mbtiIdx}
+                 )
+    </insert>
+
+    <!-- id는 Mapper 인터페이스의 메서드 이름과 일치해야 함 -->
+    <select id="idCheck" resultType="int" parameterType="String">
+        SELECT
+            COUNT(*)
+        FROM
+            MEMBER
+        WHERE
+            mid = #{mid}
+    </select>
+
+</mapper>

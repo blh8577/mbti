@@ -25,7 +25,7 @@ public class BoardVO {
     //반대수
     private int opposition;
     //작성자
-    private String member_mid;
+    private String memberMid;
     //작성자mbti
     private String mbtiIdx;
     //내용

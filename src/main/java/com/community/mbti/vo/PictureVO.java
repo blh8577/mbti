@@ -8,5 +8,5 @@ import lombok.Setter;
 public class PictureVO {
     private int pictureno;
     private String picturepath;
-    private int board_board;
+    private int boardBoardno;
 }
