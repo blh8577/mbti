@@ -2,6 +2,9 @@ package com.community.mbti.vo;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +33,6 @@ public class BoardVO {
     private String mbtiIdx;
     //내용
     private String content;
+
+    private List<MultipartFile> files;
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.mbti.mapper.RecommendationMapper">
+    <select id="checkBoardRecommendation" resultType="int" parameterType="map">
+        SELECT COUNT(*) FROM RECOMMENDATION WHERE bordno = #{boardno} AND member_mid = #{memberMid} AND boardcheck = 'B'
+    </select>
+    <insert id="insertBoardRecommendation" parameterType="map">
+        INSERT INTO RECOMMENDATION (recommendationno, bordno, member_mid, boardcheck, owner) VALUES (RECOMMENDATION_SEQ.NEXTVAL, #{boardno}, #{memberMid}, 'B', 0)
+    </insert>
+    <select id="checkCommentRecommendation" resultType="int" parameterType="map">
+        SELECT COUNT(*) FROM RECOMMENDATION WHERE bordno = #{commentno} AND member_mid = #{memberMid} AND boardcheck = 'C'
+    </select>
+    <insert id="insertCommentRecommendation" parameterType="map">
+        INSERT INTO RECOMMENDATION (recommendationno, bordno, member_mid, boardcheck, owner) VALUES (RECOMMENDATION_SEQ.NEXTVAL, #{commentno}, #{memberMid}, 'C', 0)
+    </insert>
+</mapper>

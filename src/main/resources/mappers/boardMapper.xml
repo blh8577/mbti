@@ -13,7 +13,7 @@
     </select>
 
     <!-- 전체 게시물 수 조회 -->
-    <select id="selectBoardCount" resultType="int" parameterType="map">
+    <select id="selectBoardCount" resultType="int">
         /* selectBoardCount */
         SELECT COUNT(*)
         FROM BOARD
@@ -28,7 +28,7 @@
     </select>
 
     <!-- 최신 게시물 목록 조회 (페이징) -->
-    <select id="selectBoardList" resultType="com.community.mbti.vo.BoardVO" parameterType="map">
+    <select id="selectBoardList" resultType="com.community.mbti.vo.BoardVO">
         /* selectBoardList */
         SELECT *
         FROM (
@@ -51,7 +51,7 @@
     </select>
 
     <!-- 인기 게시물 목록 조회 (상위 5개) -->
-    <select id="selectPopBoardList" resultType="com.community.mbti.vo.BoardVO" parameterType="map">
+    <select id="selectPopBoardList" resultType="com.community.mbti.vo.BoardVO">
         /* selectPopBoardList */
         SELECT *
         FROM (
@@ -70,16 +70,26 @@
         WHERE ROWNUM &lt;= 5
     </select>
 
-    <!-- 홈 화면용 최신글 조회 -->
+    <!-- [수정] 홈 화면용 최신글 조회 - MBTI 관계 기반 필터링 추가 -->
     <select id="selectLatestBoards" resultType="com.community.mbti.vo.BoardVO">
         /* selectLatestBoards */
         SELECT *
         FROM (
-                 SELECT boardno, title, wrdate, member_mid
-                 FROM BOARD
-                 WHERE viewcheck = 'Y'
-                   AND mbti_idx = #{mbtiIdx}
-                 ORDER BY wrdate DESC
+                 SELECT
+                     boardno, title, wrdate, member_mid, category
+                 FROM
+                     BOARD
+                 WHERE
+                     viewcheck = 'Y'
+                   AND (
+                     mbti_idx = #{mbtiIdx} -- 본인 MBTI 게시물
+                         OR (category = 1 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'relation_good'))
+                         OR (category = 2 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'relation_bad'))
+                         OR (category = 3 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'love_good'))
+                         OR (category = 4 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'love_bad'))
+                     )
+                 ORDER BY
+                     wrdate DESC
              )
         WHERE ROWNUM &lt;= #{limit}
     </select>
@@ -101,21 +111,14 @@
     <!-- 게시글 등록 -->
     <insert id="insertBoard" parameterType="com.community.mbti.vo.BoardVO">
         /* insertBoard */
+        <selectKey keyProperty="boardno" resultType="int" order="BEFORE">
+            SELECT BOARD_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
         INSERT INTO BOARD (
-            boardno,
-            title,
-            content,
-            member_mid,
-            category,
-            mbti_idx
+        boardno, title, content, member_mid, category, mbti_idx
         ) VALUES (
-                     BOARD_SEQ.NEXTVAL,
-                     #{title},
-                     #{content},
-                     #{memberMid},
-                     #{category},
-                     #{mbtiIdx}
-                 )
+        #{boardno}, #{title}, #{content}, #{memberMid}, #{category}, #{mbtiIdx}
+        )
     </insert>
 
     <!-- [추가] 조회수 1 증가 -->
@@ -134,13 +137,22 @@
         WHERE boardno = #{boardno}
     </select>
 
-    <!-- [추가] 특정 게시물의 댓글 목록 조회 -->
+    <!-- [수정] Oracle의 계층형 쿼리를 사용하여 댓글을 올바르게 정렬합니다. -->
     <select id="selectCommentsByBoardNo" parameterType="int" resultType="com.community.mbti.vo.CommentsVO">
         /* selectCommentsByBoardNo */
-        SELECT *
-        FROM COMMENTS
-        WHERE board_boardno = #{boardno}
-        ORDER BY NVL(mgrno, commentno), wrdate
+        SELECT
+            commentno, content, mgrno, recommendation, opposition,
+            viewcheck, board_boardno, member_mid, "level", wrdate, mbti_idx
+        FROM
+            COMMENTS
+        WHERE
+            board_boardno = #{boardno}
+          START WITH
+            mgrno = 0
+        CONNECT BY
+            PRIOR commentno = mgrno
+        ORDER SIBLINGS BY
+            wrdate ASC
     </select>
 
     <!-- [추가] 특정 게시물의 사진 목록 조회 -->
@@ -149,6 +161,121 @@
         SELECT *
         FROM PICTURE
         WHERE board_boardno = #{boardno}
+    </select>
+
+    <!-- [추가] 게시물 추천수 1 증가 -->
+    <update id="incrementBoardRecommendation" parameterType="int">
+        /* incrementBoardRecommendation */
+        UPDATE BOARD
+        SET recommendation = recommendation + 1
+        WHERE boardno = #{boardno}
+    </update>
+
+    <!-- 로그인 사용자의 MBTI 및 관계에 따른 주간 인기글 조회 -->
+    <select id="selectWeeklyPopularBoards" resultType="com.community.mbti.vo.BoardVO">
+        /* selectWeeklyPopularBoards */
+        SELECT *
+        FROM (
+                 SELECT
+                     boardno, title, category, recommendation
+                 FROM
+                     BOARD
+                 WHERE
+                     viewcheck = 'Y'
+                   AND wrdate >= SYSDATE - 7
+                   AND (
+                     mbti_idx = #{mbtiIdx} -- 본인 MBTI 게시물
+                         OR (category = 1 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'relation_good'))
+                         OR (category = 2 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'relation_bad'))
+                         OR (category = 3 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'love_good'))
+                         OR (category = 4 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{mbtiIdx} AND relation_type = 'love_bad'))
+                     )
+                 ORDER BY
+                     recommendation DESC
+             )
+        WHERE ROWNUM &lt;= #{limit}
+    </select>
+
+    <insert id="insertPicture" parameterType="com.community.mbti.vo.PictureVO">
+        /* insertPicture */
+        INSERT INTO PICTURE (pictureno, picturepath, board_boardno)
+        VALUES (PICTURE_SEQ.NEXTVAL, #{picturepath}, #{boardBoardno})
+    </insert>
+
+    <!-- [추가] 게시물 논리적 삭제 -->
+    <update id="updateBoardViewCheck" parameterType="int">
+        /* updateBoardViewCheck */
+        UPDATE BOARD
+        SET viewcheck = 'N'
+        WHERE boardno = #{boardno}
+    </update>
+
+    <!-- [수정] 검색 결과 게시물 수 조회 -->
+    <select id="selectSearchBoardCount" resultType="int">
+        /* selectSearchBoardCount */
+        SELECT COUNT(*)
+        FROM BOARD
+        WHERE viewcheck = 'Y'
+        AND title LIKE '%' || #{keyword} || '%'
+        <choose>
+            <!-- 홈 검색 (category가 null) -->
+            <when test="category == null">
+                AND (
+                mbti_idx = #{userMbti}
+                OR (category = 1 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'relation_good'))
+                OR (category = 2 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'relation_bad'))
+                OR (category = 3 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'love_good'))
+                OR (category = 4 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'love_bad'))
+                )
+            </when>
+            <!-- 게시판 내 검색 -->
+            <otherwise>
+                AND category = #{category}
+                <if test="mbtiList != null and !mbtiList.isEmpty()">
+                    AND mbti_idx IN
+                    <foreach item="mbti" collection="mbtiList" open="(" separator="," close=")">
+                        #{mbti}
+                    </foreach>
+                </if>
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- [수정] 검색 결과 게시물 목록 조회 (페이징) -->
+    <select id="selectSearchBoardList" resultType="com.community.mbti.vo.BoardVO">
+        /* selectSearchBoardList */
+        SELECT *
+        FROM (
+        SELECT ROWNUM AS rn, b.*
+        FROM (
+        SELECT boardno, title, member_mid, wrdate, recommendation, count, mbti_idx, category
+        FROM BOARD
+        WHERE viewcheck = 'Y'
+        AND title LIKE '%' || #{keyword} || '%'
+        <choose>
+            <when test="category == null">
+                AND (
+                mbti_idx = #{userMbti}
+                OR (category = 1 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'relation_good'))
+                OR (category = 2 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'relation_bad'))
+                OR (category = 3 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'love_good'))
+                OR (category = 4 AND mbti_idx IN (SELECT mbti_to FROM MBTI_RELATIONS WHERE mbti_from = #{userMbti} AND relation_type = 'love_bad'))
+                )
+            </when>
+            <otherwise>
+                AND category = #{category}
+                <if test="mbtiList != null and !mbtiList.isEmpty()">
+                    AND mbti_idx IN
+                    <foreach item="mbti" collection="mbtiList" open="(" separator="," close=")">
+                        #{mbti}
+                    </foreach>
+                </if>
+            </otherwise>
+        </choose>
+        ORDER BY boardno DESC
+        ) b
+        )
+        WHERE rn BETWEEN #{paging.startNum} AND #{paging.endNum}
     </select>
 
 </mapper>

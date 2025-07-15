@@ -23,5 +23,4 @@ public interface MemberMapper {
      */
     int idCheck(String mid);
 
-
 }

@@ -6,7 +6,7 @@
 <html>
 <head>
 <title>MBTI</title>
-<link rel="stylesheet" href="./css.css">
+	<c:import url="/WEB-INF/views/fragments/head.jsp" />
 </head>
 <body>
 	<!-- Header Section -->

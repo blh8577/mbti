@@ -1,31 +1,73 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8"%>
-<header class="header_wrap <c:out value="${sessionScope.color}"/>_bottom">
-   <div class="header_top_wrap">
-      <div class="header_top_1000">
-         <div class="header_logo">
-            <a href="${pageContext.request.contextPath}/home"><img src="${pageContext.request.contextPath}/img/<c:out value="${sessionScope.loginMember.mbtiIdx}"/>.png" alt="MBTI 로고"/></a>
-         </div>
-         <div class="header_title <c:out value="${sessionScope.color}"/>_color">
-            <c:out value="${sessionScope.loginMember.mbtiIdx}"/> 커뮤니티
-         </div>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<header class="header-wrap">
+   <div class="container header-inner">
+      <div class="header-logo">
+         <a href="${pageContext.request.contextPath}/">
+            <c:if test="${not empty sessionScope.loginMember}">
+               <img src="${pageContext.request.contextPath}/img/${sessionScope.loginMember.mbtiIdx}.png" alt="MBTI 로고"/>
+            </c:if>
+            <span>MBTI 커뮤니티</span>
+         </a>
       </div>
-   </div>
-   <nav class="header_nav_wrap <c:out value="${sessionScope.color}"/>_background">
-      <div class="header_nav_1000">
+      <nav class="header-nav">
          <ul>
-            <li><a href="${pageContext.request.contextPath}/board?cat=0">게시판</a>
-               <ul>
-                  <li class="<c:out value="${sessionScope.color}"/>_background"><a href="${pageContext.request.contextPath}/board?cat=0">MBTI 게시판</a></li>
-                  <li class="<c:out value="${sessionScope.color}"/>_background"><a href="${pageContext.request.contextPath}/board?cat=1">RG 게시판</a></li>
-                  <li class="<c:out value="${sessionScope.color}"/>_background"><a href="${pageContext.request.contextPath}/board?cat=2">RB 게시판</a></li>
-                  <li class="<c:out value="${sessionScope.color}"/>_background"><a href="${pageContext.request.contextPath}/board?cat=3">LG 게시판</a></li>
-                  <li class="<c:out value="${sessionScope.color}"/>_background"><a href="${pageContext.request.contextPath}/board?cat=4">LB 게시판</a></li>
-               </ul>
-            </li>
-            <li><a href="${pageContext.request.contextPath}/chatroom">채팅</a></li>
+            <%-- [수정] pageType이 'simple'이 아닐 때만 게시판/채팅 메뉴를 보여줌 --%>
+            <c:if test="${pageType ne 'simple'}">
+               <li>
+                  <a href="${pageContext.request.contextPath}/board?cat=0">게시판</a>
+                  <ul>
+                     <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI</a></li>
+                     <li><a href="${pageContext.request.contextPath}/board?cat=1">RG</a></li>
+                     <li><a href="${pageContext.request.contextPath}/board?cat=2">RB</a></li>
+                     <li><a href="${pageContext.request.contextPath}/board?cat=3">LG</a></li>
+                     <li><a href="${pageContext.request.contextPath}/board?cat=4">LB</a></li>
+                  </ul>
+               </li>
+               <li><a href="#">채팅</a></li>
+            </c:if>
+            <c:choose>
+               <c:when test="${empty sessionScope.loginMember}">
+                  <li><a href="${pageContext.request.contextPath}/" class="btn btn-secondary">로그인</a></li>
+                  <li><a href="${pageContext.request.contextPath}/join" class="btn btn-primary blue-bg">회원가입</a></li>
+               </c:when>
+               <c:otherwise>
+                  <li><a href="${pageContext.request.contextPath}/myNotes">내 쪽지함</a></li>
+                  <li><a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary">로그아웃</a></li>
+               </c:otherwise>
+            </c:choose>
          </ul>
-      </div>
+      </nav>
+      <button class="mobile-menu-btn" id="mobile-menu-toggle">
+         <span></span><span></span><span></span>
+      </button>
+   </div>
+   <nav class="mobile-nav" id="mobile-nav">
+      <ul>
+         <%-- [수정] pageType이 'simple'이 아닐 때만 게시판/채팅 메뉴를 보여줌 --%>
+         <c:if test="${pageType ne 'simple'}">
+            <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI 게시판</a></li>
+            <li><a href="${pageContext.request.contextPath}/board?cat=1">RG 게시판</a></li>
+            <li><a href="${pageContext.request.contextPath}/board?cat=2">RB 게시판</a></li>
+            <li><a href="${pageContext.request.contextPath}/board?cat=3">LG 게시판</a></li>
+            <li><a href="${pageContext.request.contextPath}/board?cat=4">LB 게시판</a></li>
+            <li><a href="#">채팅</a></li>
+         </c:if>
+         <c:choose>
+            <c:when test="${empty sessionScope.loginMember}">
+               <li><a href="${pageContext.request.contextPath}/login">로그인</a></li>
+               <li><a href="${pageContext.request.contextPath}/join">회원가입</a></li>
+            </c:when>
+            <c:otherwise>
+               <li><a href="${pageContext.request.contextPath}/logout">로그아웃</a></li>
+            </c:otherwise>
+         </c:choose>
+      </ul>
    </nav>
 </header>
+<script>
+   document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-nav').classList.toggle('is-active');
+   });
+</script>

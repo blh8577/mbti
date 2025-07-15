@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.community.mbti.mapper.NoteMapper">
+    <insert id="insertNote" parameterType="com.community.mbti.vo.NoteVO">
+        /* insertNote */
+        INSERT INTO NOTE (noteno, content, member_mid, recipients, re_mbti)
+        VALUES (NOTE_SEQ.NEXTVAL, #{content, jdbcType=VARCHAR}, #{memberMid, jdbcType=VARCHAR}, #{recipients, jdbcType=VARCHAR}, #{reMbti, jdbcType=VARCHAR})
+    </insert>
+
+    <!-- [수정] 읽지 않은 쪽지 목록 조회 (보낸 사람 MBTI 포함) -->
+    <select id="selectUnreadNotes" resultType="com.community.mbti.vo.NoteVO">
+        /* selectUnreadNotes */
+        SELECT *
+        FROM (
+                 SELECT
+                     n.noteno, n.content, n.member_mid, n.wrdate, m.mbti_idx as senderMbti
+                 FROM
+                     NOTE n
+                         JOIN
+                     MEMBER m ON n.member_mid = m.mid
+                 WHERE
+                     n.recipients = #{memberId}
+                   AND n.read_check = 'N'
+                 ORDER BY
+                     n.wrdate DESC
+             )
+        WHERE ROWNUM &lt;= #{limit}
+    </select>
+
+    <!-- [추가] 받은 모든 쪽지 목록 조회 -->
+    <select id="selectAllReceivedNotes" resultType="com.community.mbti.vo.NoteVO">
+        /* selectAllReceivedNotes */
+        SELECT
+            n.noteno, n.content, n.member_mid, n.wrdate, n.read_check, m.mbti_idx as senderMbti
+        FROM
+            NOTE n
+                JOIN
+            MEMBER m ON n.member_mid = m.mid
+        WHERE
+            n.recipients = #{memberId}
+        ORDER BY
+            n.wrdate DESC
+    </select>
+
+    <!-- [추가] 특정 쪽지 1건 조회 -->
+    <select id="selectNoteByNo" resultType="com.community.mbti.vo.NoteVO">
+        /* selectNoteByNo */
+        SELECT * FROM NOTE WHERE noteno = #{noteno}
+    </select>
+
+    <!-- [추가] 쪽지 읽음 처리 -->
+    <update id="markNoteAsRead">
+        /* markNoteAsRead */
+        UPDATE NOTE SET read_check = 'Y' WHERE noteno = #{noteno}
+    </update>
+</mapper>

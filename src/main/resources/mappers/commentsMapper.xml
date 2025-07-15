@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.community.mbti.mapper.CommentsMapper">
+
+    <insert id="insertComment" parameterType="com.community.mbti.vo.CommentsVO">
+        /* insertComment */
+        INSERT INTO COMMENTS (
+            commentno,
+            content,
+            mgrno,
+            board_boardno,
+            member_mid,
+            "level",
+            mbti_idx
+        ) VALUES (
+                     COMMENTS_SEQ.NEXTVAL,
+                     #{content},
+                     #{mgrno},
+                     #{boardBoardno},
+                     #{memberMid},
+                     #{level},
+                     #{mbtiIdx}
+                 )
+    </insert>
+
+    <!-- [추가] 특정 댓글 1건 조회 -->
+    <select id="selectCommentByNo" parameterType="int" resultType="com.community.mbti.vo.CommentsVO">
+        /* selectCommentByNo */
+        SELECT
+            commentno,
+            content,
+            mgrno,
+            "level",
+            member_mid
+        FROM
+            COMMENTS
+        WHERE
+            commentno = #{commentno}
+    </select>
+
+    <!-- [추가] 댓글 추천수 1 증가 -->
+    <update id="incrementCommentRecommendation" parameterType="int">
+        /* incrementCommentRecommendation */
+        UPDATE COMMENTS
+        SET recommendation = recommendation + 1
+        WHERE commentno = #{commentno}
+    </update>
+
+    <!-- [추가] 댓글 논리적 삭제 -->
+    <update id="updateCommentViewCheck" parameterType="int">
+        /* updateCommentViewCheck */
+        UPDATE COMMENTS
+        SET viewcheck = 'N'
+        WHERE commentno = #{commentno}
+    </update>
+
+</mapper>

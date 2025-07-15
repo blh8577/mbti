@@ -1,70 +1,86 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-         pageEncoding="UTF-8"%>
-<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
-
-<%-- 세션에 저장된 loginMember 객체의 mbtiIdx 값을 사용합니다. --%>
-<c:set var="mbti" value="${sessionScope.loginMember.mbtiIdx}" />
-<%--
-    [수정] color 변수를 설정하는 부분을 제거합니다.
-    이제부터는 컨트롤러에서 세션에 저장한 ${color} 또는 ${sessionScope.color} 값을 직접 사용합니다.
---%>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c"  uri="jakarta.tags.core"%>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MBTI</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/mainCss.css">
+    <title>MBTI 커뮤니티</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <c:import url="/WEB-INF/views/fragments/head.jsp" />
 </head>
 <body>
-<!-- Header Section -->
 <c:import url="/WEB-INF/views/header.jsp"></c:import>
-
-<!-- Content Section -->
-<section class="home_content_wrap">
-    <div class="home_content_1000">
-        <table>
-            <tr>
-                <td width="70%" height="50%" class="<c:out value="${color}"/>_border">
-                    <div class="home_content_title  <c:out value="${color}"/>_bottom">인기글 게시판 뷰</div>
-                    <div class="home_content_list_wrap">
-                        <ul>
-                            <c:import url="/latestBoard?homeboard=2"></c:import>
-                        </ul>
-                    </div>
-                </td>
-                <td width="30%" class="<c:out value="${color}"/>_border">
-                    <div class="home_my_info_wrap <c:out value="${color}"/>_color"><c:out value="${mbti}"/></div>
-                    <div class="home_my_logint_wrap"><button class="<c:out value="${color}"/>_background" onClick="location.href='${pageContext.request.contextPath}/logout'">로그아웃</button></div>
-                </td>
-            </tr>
-            <tr>
-                <td height="50%" class="<c:out value="${color}"/>_border">
-                    <div class="home_content_title  <c:out value="${color}"/>_bottom">최신글 게시판 뷰</div>
-                    <div class="home_content_list_wrap">
-                        <ul>
-                            <c:import url="/latestBoard?homeboard=1"></c:import>
-                        </ul>
-                    </div>
-                </td>
-                <td class="<c:out value="${color}"/>_border">
-                    <%-- 쪽지 리스트 (주석 처리됨) --%>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="search_wrap">
-        <div>
-            <form action="${pageContext.request.contextPath}/search?cat=${param.cat}" method="post">
-                <input type="text" name="search" class="<c:out value="${color}"/>_border">
-                <input type="submit" value="검색" class="<c:out value="${color}"/>_background" />
-            </form>
+<main class="container">
+    <div class="home-grid">
+        <div class="home-main-content">
+            <div class="card">
+                <h2 class="card-title">주간 인기글</h2>
+                <div class="home-list">
+                    <ul><c:import url="/latestBoard?homeboard=2"></c:import></ul>
+                </div>
+            </div>
+            <div class="card">
+                <h2 class="card-title">최신글</h2>
+                <div class="home-list">
+                    <ul><c:import url="/latestBoard?homeboard=1"></c:import></ul>
+                </div>
+            </div>
         </div>
+        <aside class="home-side-content">
+            <div class="card">
+                <div class="my-info ${sessionScope.color}-bg">
+                    <p class="mbti-name">${sessionScope.loginMember.mbtiIdx}</p>
+                </div>
+                <button class="btn btn-secondary" onClick="location.href='${pageContext.request.contextPath}/logout'">로그아웃</button>
+            </div>
+            <div class="card">
+                <h2 class="card-title">전체 검색</h2>
+                <form action="${pageContext.request.contextPath}/search" method="get" class="form-group">
+                    <div class="input-with-btn">
+                        <input type="text" name="search" placeholder="제목으로 검색">
+                        <button type="submit" class="btn btn-primary ${sessionScope.color}-bg">검색</button>
+                    </div>
+                </form>
+            </div>
+            <%-- [추가] 쪽지 목록 영역 --%>
+            <div class="card">
+                <h2 class="card-title">받은 쪽지함</h2>
+                <div class="home-list">
+                    <ul>
+                        <c:import url="/noteList"></c:import>
+                    </ul>
+                </div>
+            </div>
+        </aside>
     </div>
-</section>
-
-<!-- Footer Section -->
+</main>
 <c:import url="/WEB-INF/views/footer.jsp"></c:import>
+<%-- 쪽지 내용 확인을 위한 모달(팝업) --%>
+<div id="noteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 200;">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:30px; border-radius:12px; width:90%; max-width:500px;">
+        <h3 id="modalSender"></h3>
+        <p id="modalContent" style="margin-top:15px; min-height:100px;"></p>
+        <button onclick="$('#noteModal').hide()" style="float:right; margin-top:20px;" class="btn btn-secondary">닫기</button>
+    </div>
+</div>
 
+<script>
+    function viewNote(noteno, isFromMyNotesPage = false) {
+        $.post("${pageContext.request.contextPath}/note/read", { noteno: noteno })
+            .done(function(note) {
+                // 모달 내용 채우기
+                $('#modalSender').text(note.senderMbti + ' 님이 보낸 쪽지');
+                $('#modalContent').text(note.content);
+                $('#noteModal').show();
+
+                // '내 쪽지함' 페이지가 아닐 때만 목록에서 제거
+                if (!isFromMyNotesPage) {
+                    $('#note-item-' + noteno).fadeOut();
+                }
+            })
+            .fail(function() {
+                alert("쪽지를 불러오는 데 실패했습니다.");
+            });
+    }
+</script>
 </body>
 </html>

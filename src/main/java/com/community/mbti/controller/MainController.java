@@ -44,7 +44,7 @@ public class MainController {
 
         if (loginMember == null) {
             log.warn("로그인 실패: {}", mid);
-            return "redirect:/login?error=true";
+            return "redirect:/index?error=true";
         }
 
         // 로그인 성공 시 세션 생성

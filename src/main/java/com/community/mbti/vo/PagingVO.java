@@ -18,6 +18,7 @@ public class PagingVO {
     private boolean next;       // 다음 블럭으로 가는 화살표 유무
     private int startNum;       // 현재 페이지의 시작 rownum
     private int endNum;         // 현재 페이지의 끝 rownum
+    private int totalPage;      // 전체 페이지 수
 
     // totalCount가 설정되면 자동으로 페이징 관련 모든 변수를 계산합니다.
     public void setTotalCount(int totalCount) {
@@ -26,23 +27,28 @@ public class PagingVO {
     }
 
     private void paging() {
-        // 끝 페이지 계산
+        // 1. 전체 페이지 수 계산
+        totalPage = (int) Math.ceil(totalCount / (double) displayRow);
+
+        // 2. 현재 블럭의 끝 페이지 계산
         endPage = ((int) Math.ceil(page / (double) displayPage)) * displayPage;
-        // 시작 페이지 계산
+
+        // 3. 현재 블럭의 시작 페이지 계산
         beginPage = endPage - (displayPage - 1);
+        if (beginPage < 1) {
+            beginPage = 1;
+        }
 
-        // 전체 페이지 수 계산
-        int totalPage = (int) Math.ceil(totalCount / (double) displayRow);
-
+        // 4. 끝 페이지가 전체 페이지 수보다 크면, 전체 페이지 수로 맞춤
         if (totalPage < endPage) {
             endPage = totalPage;
-            next = false;
-        } else {
-            next = true;
         }
-        prev = (beginPage != 1); // 시작 페이지가 1이 아니면 무조건 이전 블럭이 있음
 
-        // 쿼리에서 사용할 rownum 범위 계산
+        // 5. 이전/다음 버튼 표시 여부 계산
+        prev = (beginPage != 1);
+        next = (endPage < totalPage);
+
+        // 6. 쿼리에서 사용할 rownum 범위 계산
         startNum = (page - 1) * displayRow + 1;
         endNum = page * displayRow;
     }
