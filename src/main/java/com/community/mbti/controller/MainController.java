@@ -47,9 +47,31 @@ public class MainController {
             return "redirect:/login?error=true";
         }
 
+        // 로그인 성공 시 세션 생성
         HttpSession session = request.getSession();
         session.setAttribute("loginMember", loginMember);
-        log.info("로그인 성공 및 세션 생성: {}", mid);
+
+        // [수정] MBTI에 따라 색상을 결정하고 세션에 저장
+        String mbti = loginMember.getMbtiIdx();
+        String color = "default"; // 기본값
+        if (mbti != null) {
+            switch (mbti.toUpperCase()) {
+                case "INTJ": case "INTP": case "ENTJ": case "ENTP":
+                    color = "pink";
+                    break;
+                case "INFJ": case "INFP": case "ENFJ": case "ENFP":
+                    color = "green";
+                    break;
+                case "ISTJ": case "ISFJ": case "ESTJ": case "ESFJ":
+                    color = "blue";
+                    break;
+                case "ISTP": case "ISFP": case "ESTP": case "ESFP":
+                    color = "yellow";
+                    break;
+            }
+        }
+        session.setAttribute("color", color); // 세션에 색상 저장
+        log.info("로그인 성공 및 세션 생성: {}, 색상: {}", mid, color);
 
         return "redirect:/home";
     }
@@ -70,21 +92,15 @@ public class MainController {
             memberService.joinMember(memberVO);
             return "redirect:/index";
         } catch (Exception e) {
-            e.printStackTrace();
             return "redirect:/join?error=true";
         }
     }
 
-    // --- [추가] 검색 처리 ---
+    // --- 검색 처리 ---
     @PostMapping("/search")
     public String searchProcess(@RequestParam("search") String keyword,
                                 @RequestParam(value = "cat", required = false) String category) {
-        // 검색 요청이 들어오면 로그를 남깁니다.
         log.info("검색 요청 - 카테고리: {}, 키워드: {}", category, keyword);
-
-        // 실제 검색 로직을 수행한 후, 검색 결과 페이지로 이동합니다.
-        // 여기서는 예시로 다시 홈으로 리다이렉트합니다.
-        // TODO: 검색 결과 페이지로 이동하도록 수정 필요
         return "redirect:/home";
     }
 

@@ -2,18 +2,17 @@
          pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
 
-<%--
-    [수정] 세션에 저장된 loginMember 객체의 mbtiIdx 값을 사용합니다.
-    [참고] color 값은 세션에 저장하는 로직이 없으므로, 일단 비워두거나 기본값을 지정해야 합니다.
---%>
+<%-- 세션에 저장된 loginMember 객체의 mbtiIdx 값을 사용합니다. --%>
 <c:set var="mbti" value="${sessionScope.loginMember.mbtiIdx}" />
-<c:set var="color" value="default_color" /> <%-- 예시: 기본 색상 지정 --%>
+<%--
+    [수정] color 변수를 설정하는 부분을 제거합니다.
+    이제부터는 컨트롤러에서 세션에 저장한 ${color} 또는 ${sessionScope.color} 값을 직접 사용합니다.
+--%>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>MBTI</title>
-    <%-- [수정] 절대 경로 사용 --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/mainCss.css">
 </head>
 <body>
@@ -29,14 +28,12 @@
                     <div class="home_content_title  <c:out value="${color}"/>_bottom">인기글 게시판 뷰</div>
                     <div class="home_content_list_wrap">
                         <ul>
-                            <%-- [수정] 절대 경로 사용 --%>
                             <c:import url="/latestBoard?homeboard=2"></c:import>
                         </ul>
                     </div>
                 </td>
                 <td width="30%" class="<c:out value="${color}"/>_border">
                     <div class="home_my_info_wrap <c:out value="${color}"/>_color"><c:out value="${mbti}"/></div>
-                    <%-- [수정] 절대 경로 사용 --%>
                     <div class="home_my_logint_wrap"><button class="<c:out value="${color}"/>_background" onClick="location.href='${pageContext.request.contextPath}/logout'">로그아웃</button></div>
                 </td>
             </tr>
@@ -45,7 +42,6 @@
                     <div class="home_content_title  <c:out value="${color}"/>_bottom">최신글 게시판 뷰</div>
                     <div class="home_content_list_wrap">
                         <ul>
-                            <%-- [수정] 절대 경로 사용 --%>
                             <c:import url="/latestBoard?homeboard=1"></c:import>
                         </ul>
                     </div>
@@ -59,7 +55,6 @@
 
     <div class="search_wrap">
         <div>
-            <%-- [수정] 절대 경로 사용 --%>
             <form action="${pageContext.request.contextPath}/search?cat=${param.cat}" method="post">
                 <input type="text" name="search" class="<c:out value="${color}"/>_border">
                 <input type="submit" value="검색" class="<c:out value="${color}"/>_background" />
