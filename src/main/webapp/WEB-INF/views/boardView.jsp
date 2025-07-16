@@ -8,7 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         function openNote(recipientId) {
-            const url = `${pageContext.request.contextPath}/noteView?recipients=${recipientId}`;
+            const url = `${pageContext.request.contextPath}/noteView?recipients=` + recipientId;
             window.open(url, 'noteWindow', 'width=500,height=550');
         }
         $(document).ready(function() {
@@ -75,7 +75,7 @@
         <div class="board-view-header">
             <h1><c:out value="${boardview.title}" /></h1>
             <div class="board-view-meta">
-                <span><a href="javascript:void(0);" onclick="openNote('${board.memberMid}')">작성자: <c:out value="${boardview.mbtiIdx}" /></a></span>
+                <span><a href="javascript:void(0);" onclick="openNote('${boardview.memberMid}')">작성자: <c:out value="${boardview.mbtiIdx}" /></a></span>
                 <span>작성일: <c:out value="${boardview.wrdate}" /></span>
                 <span>추천수: <span id="board-rec-count"><c:out value="${boardview.recommendation}" /></span></span>
                 <span>조회수: <c:out value="${boardview.count}" /></span>
@@ -100,7 +100,7 @@
                 <c:forEach var="com" items="${comlist}" varStatus="s">
                     <div class="comment-item" style="padding-left: ${(com.level - 1) * 20}px;">
                         <div class="comment-header">
-                            <span class="comment-author"><a href="javascript:void(0);" onclick="openNote('${board.memberMid}')"><c:out value="${com.mbtiIdx}"/></a></span>
+                            <span class="comment-author"><a href="javascript:void(0);" onclick="openNote('${com.memberMid}')"><c:out value="${com.mbtiIdx}"/></a></span>
                             <div class="comment-actions">
                                 <c:if test="${com.viewcheck eq 'Y'}">
                                     <button onclick="comrecommendation(${com.commentno})">추천 <span id="comment-rec-count-${com.commentno}">${com.recommendation}</span></button>

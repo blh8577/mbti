@@ -15,6 +15,13 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     /**
+     * [추가] 아이디로 회원 정보를 조회하는 서비스
+     */
+    public MemberVO getMemberInfo(String mid) {
+        return memberMapper.findMemberById(mid);
+    }
+
+    /**
      * [추가] 수동 로그인을 위한 서비스 메서드
      * @return 로그인 성공 시 MemberVO 객체, 실패 시 null
      */

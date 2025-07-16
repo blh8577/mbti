@@ -45,29 +45,81 @@
                 </tbody>
             </table>
         </div>
+
+        <%-- [추가] 페이지네이션 --%>
+        <div class="board-actions">
+            <div class="pagination-wrapper">
+                <div class="pagination">
+                    <c:if test="${paging.prev}">
+                        <button onClick="location.href='${pageContext.request.contextPath}/myNotes?page=1'">&lt;&lt;</button>
+                        <button onClick="location.href='${pageContext.request.contextPath}/myNotes?page=${paging.beginPage - 1}'">&lt;</button>
+                    </c:if>
+                    <c:forEach begin="${paging.beginPage}" end="${paging.endPage}" var="index">
+                        <c:choose>
+                            <c:when test="${paging.page == index}">
+                                <button class="btn-primary ${sessionScope.color}-bg" disabled>${index}</button>
+                            </c:when>
+                            <c:otherwise>
+                                <button onClick="location.href='${pageContext.request.contextPath}/myNotes?page=${index}'">${index}</button>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                    <c:if test="${paging.next}">
+                        <button onClick="location.href='${pageContext.request.contextPath}/myNotes?page=${paging.endPage + 1}'">&gt;</button>
+                        <button onClick="location.href='${pageContext.request.contextPath}/myNotes?page=${paging.totalPage}'">&gt;&gt;</button>
+                    </c:if>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 <c:import url="/WEB-INF/views/footer.jsp" />
 
-<%-- 쪽지 내용 확인을 위한 모달(팝업) --%>
 <div id="noteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 200;">
     <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:30px; border-radius:12px; width:90%; max-width:500px;">
         <h3 id="modalSender"></h3>
         <p id="modalContent" style="margin-top:15px; min-height:100px;"></p>
-        <button onclick="$('#noteModal').hide()" style="float:right; margin-top:20px;" class="btn btn-secondary">닫기</button>
+        <div id="modalActions" style="text-align: right; margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+        </div>
     </div>
 </div>
 
 <script>
+    function openNote(recipientId) {
+        const url = `${pageContext.request.contextPath}/noteView?recipients=`+recipientId;
+        window.open(url, 'noteWindow', 'width=500,height=550');
+    }
+
     function viewNote(noteno, isFromMyNotesPage = false) {
         $.post("${pageContext.request.contextPath}/note/read", { noteno: noteno })
             .done(function(note) {
-                // 모달 내용 채우기
-                $('#modalSender').text(note.senderMbti + ' 님이 보낸 쪽지');
+                $('#modalSender').text((note.senderMbti || '알 수 없음') + ' 님이 보낸 쪽지');
                 $('#modalContent').text(note.content);
+
+                const actionsDiv = $('#modalActions');
+                actionsDiv.empty();
+
+                const replyButton = $('<button></button>')
+                    .addClass('btn btn-primary ${sessionScope.color}-bg')
+                    .text('답장하기')
+                    .on('click', function() {
+                        openNote(note.memberMid);
+                        $('#noteModal').hide();
+                    });
+
+                const closeButton = $('<button></button>')
+                    .addClass('btn btn-secondary')
+                    .text('닫기')
+                    .on('click', function() {
+                        $('#noteModal').hide();
+                        if(isFromMyNotesPage) {
+                            location.reload();
+                        }
+                    });
+
+                actionsDiv.append(replyButton, closeButton);
                 $('#noteModal').show();
 
-                // '내 쪽지함' 페이지가 아닐 때만 목록에서 제거
                 if (!isFromMyNotesPage) {
                     $('#note-item-' + noteno).fadeOut();
                 }

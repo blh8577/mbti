@@ -59,20 +59,47 @@
     <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:30px; border-radius:12px; width:90%; max-width:500px;">
         <h3 id="modalSender"></h3>
         <p id="modalContent" style="margin-top:15px; min-height:100px;"></p>
-        <button onclick="$('#noteModal').hide()" style="float:right; margin-top:20px;" class="btn btn-secondary">닫기</button>
+        <div id="modalActions" style="text-align: right; margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+        </div>
     </div>
 </div>
 
 <script>
+    function openNote(recipientId) {
+        const url = `${pageContext.request.contextPath}/noteView?recipients=`+recipientId;
+        window.open(url, 'noteWindow', 'width=500,height=550');
+    }
+
     function viewNote(noteno, isFromMyNotesPage = false) {
         $.post("${pageContext.request.contextPath}/note/read", { noteno: noteno })
             .done(function(note) {
-                // 모달 내용 채우기
-                $('#modalSender').text(note.senderMbti + ' 님이 보낸 쪽지');
+                $('#modalSender').text((note.senderMbti || '알 수 없음') + ' 님이 보낸 쪽지');
                 $('#modalContent').text(note.content);
+
+                const actionsDiv = $('#modalActions');
+                actionsDiv.empty();
+
+                const replyButton = $('<button></button>')
+                    .addClass('btn btn-primary ${sessionScope.color}-bg')
+                    .text('답장하기')
+                    .on('click', function() {
+                        openNote(note.memberMid);
+                        $('#noteModal').hide();
+                    });
+
+                const closeButton = $('<button></button>')
+                    .addClass('btn btn-secondary')
+                    .text('닫기')
+                    .on('click', function() {
+                        $('#noteModal').hide();
+                        if(isFromMyNotesPage) {
+                            location.reload();
+                        }
+                    });
+
+                actionsDiv.append(replyButton, closeButton);
                 $('#noteModal').show();
 
-                // '내 쪽지함' 페이지가 아닐 때만 목록에서 제거
                 if (!isFromMyNotesPage) {
                     $('#note-item-' + noteno).fadeOut();
                 }

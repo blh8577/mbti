@@ -14,7 +14,7 @@
             <form action="${pageContext.request.contextPath}/noteSend" method="post">
                 <div class="form-group">
                     <label>받는 사람</label>
-                    <input type="text" value="${recipients}" disabled>
+                    <input type="text" value="${recipientMbti}" disabled>
                     <input type="hidden" name="recipients" value="${recipients}">
                 </div>
                 <div class="form-group">
@@ -22,7 +22,7 @@
                     <textarea id="content" name="content" required></textarea>
                 </div>
                 <div class="form-actions" style="justify-content: flex-end;">
-                    <button type="submit" class="btn btn-primary blue-bg">보내기</button>
+                    <button type="submit" class="btn btn-primary ${sessionScope.color}-bg">보내기</button>
                 </div>
             </form>
         </div>
