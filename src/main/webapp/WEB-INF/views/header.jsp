@@ -1,6 +1,5 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-
 <header class="header-wrap">
    <div class="container header-inner">
       <div class="header-logo">
@@ -13,23 +12,29 @@
       </div>
       <nav class="header-nav">
          <ul>
-            <%-- [수정] pageType이 'simple'이 아닐 때만 게시판/채팅 메뉴를 보여줌 --%>
-            <c:if test="${pageType ne 'simple'}">
-               <li>
-                  <a href="${pageContext.request.contextPath}/board?cat=0">게시판</a>
-                  <ul>
-                     <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI</a></li>
-                     <li><a href="${pageContext.request.contextPath}/board?cat=1">RG</a></li>
-                     <li><a href="${pageContext.request.contextPath}/board?cat=2">RB</a></li>
-                     <li><a href="${pageContext.request.contextPath}/board?cat=3">LG</a></li>
-                     <li><a href="${pageContext.request.contextPath}/board?cat=4">LB</a></li>
-                  </ul>
-               </li>
-               <li><a href="#">채팅</a></li>
-            </c:if>
+            <li>
+               <a href="${pageContext.request.contextPath}/board?cat=0">게시판</a>
+               <ul>
+                  <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI</a></li>
+                  <li><a href="${pageContext.request.contextPath}/board?cat=1">RG</a></li>
+                  <li><a href="${pageContext.request.contextPath}/board?cat=2">RB</a></li>
+                  <li><a href="${pageContext.request.contextPath}/board?cat=3">LG</a></li>
+                  <li><a href="${pageContext.request.contextPath}/board?cat=4">LB</a></li>
+               </ul>
+            </li>
+            <li>
+               <a href="${pageContext.request.contextPath}/chatroom?cat=0">채팅</a>
+               <ul>
+                  <li><a href="${pageContext.request.contextPath}/chatroom?cat=0">MBTI</a></li>
+                  <li><a href="${pageContext.request.contextPath}/chatroom?cat=1">RG</a></li>
+                  <li><a href="${pageContext.request.contextPath}/chatroom?cat=2">RB</a></li>
+                  <li><a href="${pageContext.request.contextPath}/chatroom?cat=3">LG</a></li>
+                  <li><a href="${pageContext.request.contextPath}/chatroom?cat=4">LB</a></li>
+               </ul>
+            </li>
             <c:choose>
                <c:when test="${empty sessionScope.loginMember}">
-                  <li><a href="${pageContext.request.contextPath}/" class="btn btn-secondary">로그인</a></li>
+                  <li><a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">로그인</a></li>
                   <li><a href="${pageContext.request.contextPath}/join" class="btn btn-primary blue-bg">회원가입</a></li>
                </c:when>
                <c:otherwise>
@@ -45,24 +50,15 @@
    </div>
    <nav class="mobile-nav" id="mobile-nav">
       <ul>
-         <%-- [수정] pageType이 'simple'이 아닐 때만 게시판/채팅 메뉴를 보여줌 --%>
-         <c:if test="${pageType ne 'simple'}">
-            <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI 게시판</a></li>
-            <li><a href="${pageContext.request.contextPath}/board?cat=1">RG 게시판</a></li>
-            <li><a href="${pageContext.request.contextPath}/board?cat=2">RB 게시판</a></li>
-            <li><a href="${pageContext.request.contextPath}/board?cat=3">LG 게시판</a></li>
-            <li><a href="${pageContext.request.contextPath}/board?cat=4">LB 게시판</a></li>
-            <li><a href="#">채팅</a></li>
+         <li><a href="${pageContext.request.contextPath}/board?cat=0">MBTI 게시판</a></li>
+         <li><a href="${pageContext.request.contextPath}/chatroom?cat=0">MBTI 채팅방</a></li>
+         <li><a href="${pageContext.request.contextPath}/myNotes">내 쪽지함</a></li>
+         <c:if test="${empty sessionScope.loginMember}">
+            <li><a href="${pageContext.request.contextPath}/login">로그인</a></li>
          </c:if>
-         <c:choose>
-            <c:when test="${empty sessionScope.loginMember}">
-               <li><a href="${pageContext.request.contextPath}/login">로그인</a></li>
-               <li><a href="${pageContext.request.contextPath}/join">회원가입</a></li>
-            </c:when>
-            <c:otherwise>
-               <li><a href="${pageContext.request.contextPath}/logout">로그아웃</a></li>
-            </c:otherwise>
-         </c:choose>
+         <c:if test="${not empty sessionScope.loginMember}">
+            <li><a href="${pageContext.request.contextPath}/logout">로그아웃</a></li>
+         </c:if>
       </ul>
    </nav>
 </header>

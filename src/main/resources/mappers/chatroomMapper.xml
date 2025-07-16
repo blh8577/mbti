@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.mbti.mapper.ChatroomMapper">
+
+    <insert id="insertMessage" parameterType="com.community.mbti.vo.ChatroomVO">
+        INSERT INTO CHATROOM (chatno, chat, category, member_mid, mbti_idx)
+        VALUES (CHATROOM_SEQ.NEXTVAL, #{chat}, #{category}, #{memberMid}, #{mbtiIdx})
+    </insert>
+
+    <select id="getAllMbtiRelations" resultType="map">
+        SELECT mbti_from, mbti_to, relation_type FROM MBTI_RELATIONS
+    </select>
+
+    <select id="selectInitialMessages" resultType="com.community.mbti.vo.ChatroomVO">
+        SELECT * FROM (
+        SELECT chat, mbti_idx, wrdate, member_mid
+        FROM CHATROOM
+        WHERE category = #{category}
+        <if test="mbtiList != null and !mbtiList.isEmpty()">
+            AND mbti_idx IN
+            <foreach item="mbti" collection="mbtiList" open="(" separator="," close=")">
+                #{mbti}
+            </foreach>
+        </if>
+        ORDER BY wrdate DESC
+        ) WHERE ROWNUM &lt;= 50
+        ORDER BY ROWNUM DESC
+    </select>
+</mapper>
