@@ -57,7 +57,7 @@ MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다. �
 
 1.  **Repository 클론**
     ```bash
-    git clone [저장소 URL]
+    git clone https://github.com/blh8577/mbti.git
     ```
 
 2.  **데이터베이스 설정**
