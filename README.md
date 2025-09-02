@@ -2,22 +2,22 @@
 
 ## 1. 📖 프로젝트 소개
 
-MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다.  
-자신의 MBTI는 물론, 다른 MBTI와의 관계(좋은 관계, 나쁜 관계 등)에 따라 필터링된 게시판과 채팅방에서 다양한 사람들과 교류할 수 있는 독특한 컨셉의 서비스를 제공합니다.  
+MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다. 자신의 MBTI는 물론, 다른 MBTI와의 관계(좋은 관계, 나쁜 관계 등)에 따라 필터링된 게시판과 채팅방에서 다양한 사람들과 교류할 수 있는 독특한 컨셉의 서비스를 제공합니다.
 
-💡 **테스트용 URL**: [http://www.mbticommunity.cloud:8080/](http://www.mbticommunity.cloud:8080/)  
-- 클라우드 서버: 네이버 클라우드
-- 데이터베이스: 개인용 NAS 사용
+**테스트 URL**: [http://www.mbticommunity.cloud:8080/](http://www.mbticommunity.cloud:8080/)  
+**서버 환경**:  
+* Spring Boot 애플리케이션: 네이버 클라우드
+* DB 서버: 개인 NAS
 
 ---
 
 ## 2. ✨ 주요 기능
 
 * **회원 관리**:
-    * 회원가입 및 세션 기반 로그인/로그아웃
+    * 회원가입 및 수동 세션 기반 로그인/로그아웃
     * `BCryptPasswordEncoder`를 이용한 안전한 비밀번호 암호화
-    * **테스트용 계정**: MBTI 이름 + `_user` (예: `infp_user`, `entp_user`)  
-      공통 비밀번호: `1234`
+    * 테스트용 계정: MBTI 유형 뒤에 `_user`를 붙인 계정, 공통 비밀번호 `1234`  
+      (예: `infp_user`, `entp_user`, `intj_user` 등)
 
 * **MBTI 기반 개인화**:
     * 회원가입 시 선택한 MBTI에 따라 4가지 테마 색상(pink, green, blue, yellow) 자동 적용
@@ -54,7 +54,7 @@ MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다.
 | :--- | :--- |
 | **Backend** | Spring Boot, Java 17, Spring WebSocket |
 | **Frontend** | JSP, JSTL, CSS3, JavaScript, jQuery |
-| **Database** | Oracle DB (NAS 사용) |
+| **Database** | Oracle DB |
 | **Persistence** | MyBatis |
 | **Build Tool** | Gradle |
 
@@ -68,26 +68,12 @@ MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다.
     ```
 
 2.  **데이터베이스 설정**
-    * Oracle 데이터베이스 접속
-    * 제공된 `테이블 생성 DDL` 스크립트 실행 → 모든 테이블과 시퀀스 생성
-    * `테스트 데이터 삽입 SQL` 실행 → 초기 데이터 추가
-    * **테스트용 계정 예시**
-        ```sql
-        INSERT INTO MEMBER (username, password, mbti)
-        VALUES ('infp_user', '1234', 'INFP'),
-               ('entp_user', '1234', 'ENTP'),
-               ...;
-        ```
+    * Oracle 데이터베이스에 접속하여, 제공된 `테이블 생성 DDL` 스크립트를 실행하여 모든 테이블과 시퀀스를 생성합니다.
+    * 원활한 테스트를 위해 `테스트 데이터 삽입 SQL` 스크립트를 실행하여 초기 데이터를 추가합니다.
 
 3.  **`application.properties` 설정**
-    * `src/main/resources/application.properties` 파일에서 본인의 DB 접속 정보 수정
-        ```properties
-        spring.datasource.url=jdbc:oracle:thin:@<NAS_IP>:1521:xe
-        spring.datasource.username=YOUR_DB_USERNAME
-        spring.datasource.password=YOUR_DB_PASSWORD
-        spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
-        ```
-    * 파일 업로드 경로 설정
+    * `src/main/resources/application.properties` 파일을 열어 본인의 데이터베이스 접속 정보(URL, username, password)를 수정합니다.
+    * 파일이 업로드될 실제 서버 경로를 설정합니다. (경로 마지막에 `/`를 꼭 포함해야 합니다)
         ```properties
         # 예시: 윈도우
         file.upload-dir=C:/mbti_uploads/
@@ -96,31 +82,20 @@ MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다.
         ```
 
 4.  **애플리케이션 실행**
-    * `MbtiApplication.java` 실행 → Spring Boot 서버 시작
-    * 웹 브라우저에서 [http://localhost:8080](http://localhost:8080) 접속
+    * `MbtiApplication.java` 파일을 실행하여 스프링 부트 애플리케이션을 시작합니다.
+    * 웹 브라우저에서 `http://localhost:8080` 또는 테스트 URL에서 접속합니다.
 
 ---
 
-## 5. 📝 테스트용 계정
+## 5. 📝 테이블 구조 (ERD)
 
-| MBTI | 테스트용 아이디 | 비밀번호 |
-| :--- | :--- | :--- |
-| 모든 MBTI | `MBTI_user` (예: `infp_user`, `entp_user`) | 1234 |
-
-> 테스트 계정은 모든 MBTI 이름 뒤에 `_user`를 붙이면 생성됩니다.  
-> 공통 비밀번호: `1234`
-
----
-
-## 6. 📝 테이블 구조 (ERD)
-
-(이곳에 ERD 이미지를 추가하면 좋습니다.)
+![ERD](src/main/webapp/static/images/ERD.png)
 
 * **MEMBER**: 회원 정보
 * **BOARD**: 게시물 정보
 * **COMMENTS**: 댓글 정보
 * **NOTE**: 쪽지 정보
 * **PICTURE**: 업로드된 사진 정보
-* **MBTI_RELATIONS**: MBTI 간의 관계 정의
+* **MBTI_RELATIONS**: MBTI 간의 관계를 정의하는 핵심 테이블
 * **RECOMMENDATION / OPPOSITION**: 추천/반대 기록
 * **CHATROOM**: 채팅 메시지 기록
