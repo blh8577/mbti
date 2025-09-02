@@ -89,7 +89,7 @@ MBTI 유형에 따라 사용자들이 소통하는 웹 커뮤니티입니다. �
 
 ## 5. 📝 테이블 구조 (ERD)
 
-![ERD](src/main/webapp/static/images/ERD.png)
+![ERD](src/main/webapp/images/ERD.png)
 
 * **MEMBER**: 회원 정보
 * **BOARD**: 게시물 정보
